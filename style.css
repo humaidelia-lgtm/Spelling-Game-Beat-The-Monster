@@ -1,0 +1,61 @@
+/* --- CONTAINER KHUSUS MODE MAP (KIRI-KANAN) --- */
+#mapControls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 10px;
+    padding: 0 4px;
+    box-sizing: border-box;
+}
+
+/* --- KONTROL ANALOG (SEBELAH KIRI) --- */
+#analogContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+}
+
+.analog-base {
+    width: 85px;
+    height: 85px;
+    background-color: rgba(51, 65, 85, 0.6);
+    border: 3px solid #64748b;
+    border-radius: 50%;
+    position: relative;
+}
+
+.analog-stick {
+    width: 35px;
+    height: 35px;
+    background-color: #e2e8f0;
+    border-radius: 50%;
+    position: absolute;
+    top: 25px;
+    left: 25px;
+    cursor: pointer;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+}
+
+/* --- TOMBOL SERANG MONSTER (SEBELAH KANAN) --- */
+#btnAction {
+    display: none; /* Muncul otomatis lewat JS saat dekat monster */
+    flex: 1;
+    max-width: 140px; /* Batasi lebar tombol biar gak kepanjangan */
+    height: 50px;     /* Sesuaikan tinggi tombol agar pas di jempol */
+    font-size: 14px;
+    font-weight: bold;
+    background-color: #10b981;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+    text-transform: uppercase;
+}
+
+#btnAction:active {
+    background-color: #059669;
+}
