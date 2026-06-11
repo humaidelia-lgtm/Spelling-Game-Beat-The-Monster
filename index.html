@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Wizard Monster Spelling Duel</title>
+    <style>
+        /* --- RESET & LAYOUT UTAMA --- */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1e293b;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        /* CONTAINER UTAMA GAME */
+        #gameContainer {
+            width: 100%;
+            max-width: 420px; /* Batas maksimal lebar seukuran layar HP */
+            padding: 12px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* --- HEADER & SKOR BAR --- */
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        #scoreDisplay {
+            font-size: 18px;
+            font-weight: bold;
+            color: #38bdf8;
+            margin: 0;
+        }
+
+        #btnPause {
+            padding: 6px 16px;
+            font-size: 13px;
+            font-weight: bold;
+            background-color: #475569;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* --- STATUS PANEL --- */
+        #statusDisplay {
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            background-color: #0f172a;
+            padding: 8px;
+            border-radius: 6px;
+            margin: 0;
+            border: 1px solid #334155;
+        }
+
+        /* --- HP BAR CONTAINER (DUEL SCENE) --- */
+        #hpBarContainer {
+            display: none; /* Diatur lewat JS */
+            justify-content: space-between;
+            align-items: center;
+            background-color: #0f172a;
+            padding: 8px;
+            border-radius: 6px;
+            gap: 10px;
+        }
+
+        .hp-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .hp-label {
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .hp-bar {
+            width: 100%;
+            height: 12px;
+            background-color: #334155;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .hp-fill {
+            height: 100%;
+            width: 100%;
+            transition: width 0.3s ease;
+        }
+
+        #hpFillWizard { background-color: #10b981; }
+        #hpFillMonster { background-color: #ef4444; }
+
+        #timeDisplay {
+            font-size: 16px;
+            font-weight: bold;
+            color: #f59e0b;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        /* --- CANVAS AREA --- */
+        #canvasWrapper {
+            width: 100%;
+            background-color: #0f172a;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: center;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: auto !important;
+            aspect-ratio: 1 / 1; 
+            display: block;
+        }
+
+        /* ======================================================= */
+        /* --- KONTROL MODE MAP (ANALOG KIRI, TOMBOL SERANG KANAN) --- */
+        /* ======================================================= */
+        #mapControls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 10px;
+            padding: 0 4px;
+            box-sizing: border-box;
+        }
+
+        /* Area Analog Kiri */
+        #analogContainer {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            flex: 1;
+        }
+
+        .analog-base {
+            width: 85px;
+            height: 85px;
+            background-color: rgba(51, 65, 85, 0.6);
+            border: 3px solid #64748b;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .analog-stick {
+            width: 35px;
+            height: 35px;
+            background-color: #e2e8f0;
+            border-radius: 50%;
+            position: absolute;
+            top: 25px;
+            left: 25px;
+            cursor: pointer;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+        }
+
+        /* Tombol Serang Kanan */
+        #btnAction {
+            display: none; /* Muncul otomatis lewat JS saat dekat monster */
+            flex: 1;
+            max-width: 130px; 
+            height: 50px;     
+            font-size: 14px;
+            font-weight: bold;
+            background-color: #10b981;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+            text-transform: uppercase;
+        }
+
+        #btnAction:active {
+            background-color: #059669;
+        }
+
+        /* ======================================================= */
+        /* --- KONTROL MODE DUEL (TOMBOL KOTAK MINI SEMPURNA) --- */
+        /* ======================================================= */
+        #duelControls {
+            display: none !important; /* Diatur via JS menjadi flex saat duel mulai */
+            align-items: center !important;
+            justify-content: space-between !important;
+            gap: 6px !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+            padding: 0 !important;
+            margin: 6px 0 0 0 !important;
+        }
+
+        #duelControls[style*="display: flex"],
+        #duelControls[style*="display:flex"] {
+            display: flex !important;
+        }
+
+        /* Tombol Hear (Kotak) */
+        #btnVoice {
+            width: 40px !important;
+            height: 40px !important;
+            min-width: 40px !important;
+            max-width: 40px !important;
+            padding: 0 !important;
+            font-size: 18px !important; 
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            background-color: #3b82f6 !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 6px !important;
+            cursor: pointer !important;
+            box-sizing: border-box !important;
+        }
+
+        /* Input Teks Tengah */
+        #spellInput {
+            flex: 1 !important;
+            height: 40px !important;
+            padding: 0 10px !important;
+            font-size: 14px !important;
+            border: 2px solid #cbd5e1 !important;
+            border-radius: 6px !important;
+            outline: none !important;
+            text-transform: uppercase !important;
+            box-sizing: border-box !important;
+            text-align: center !important;
+            color: #0f172a !important;
+            background-color: #ffffff !important;
+        }
+
+        /* Tombol Cast (Kotak) */
+        #btnSubmit {
+            width: 40px !important;
+            height: 40px !important;
+            min-width: 40px !important;
+            max-width: 40px !important;
+            padding: 0 !important;
+            font-size: 18px !important; 
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            background-color: #ef4444 !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 6px !important;
+            cursor: pointer !important;
+            box-sizing: border-box !important;
+        }
+
+        #btnVoice:active { background-color: #2563eb !important; }
+        #btnSubmit:active { background-color: #dc2626 !important; }
+    </style>
+</head>
+<body>
+
+    <div id="gameContainer">
+        <div class="header-bar">
+            <p id="scoreDisplay">Skor Total: 0</p>
+            <button id="btnPause">PAUSE</button>
+        </div>
+
+        <div id="statusDisplay">Map : Beat Them!</div>
+
+        <div id="hpBarContainer">
+            <div class="hp-wrapper">
+                <span class="hp-label" style="color: #10b981;">Wizard HP</span>
+                <div class="hp-bar"><div id="hpFillWizard" class="hp-fill"></div></div>
+            </div>
+            <div id="timeDisplay">8s</div>
+            <div class="hp-wrapper" style="text-align: right;">
+                <span class="hp-label" style="color: #ef4444;">Monster HP</span>
+                <div class="hp-bar"><div id="hpFillMonster" class="hp-fill"></div></div>
+            </div>
+        </div>
+
+        <div id="canvasWrapper">
+            <canvas id="gameCanvas" width="400" height="400"></canvas>
+        </div>
+
+        <div id="mapControls">
+            <div id="analogContainer">
+                <div class="analog-base">
+                    <div id="analogStick" class="analog-stick"></div>
+                </div>
+            </div>
+            <button id="btnAction">SERANG</button>
+        </div>
+
+        <div id="duelControls">
+            <button id="btnVoice" title="Dengarkan Suara">🔊</button>
+            <input type="text" id="spellInput" placeholder="Ketik ejaan..." autocomplete="off">
+            <button id="btnSubmit" title="Serang Sihir">⚡</button>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
